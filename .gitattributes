@@ -1,0 +1,8 @@
+# 统一用 LF：Windows 上 core.autocrlf 默认会把工作区的 LF 换成 CRLF，
+# 仓库里混两种行尾会让 diff 噪音变大，也让「首次创建固定 LF」这条约定失去参照。
+* text=auto eol=lf
+
+# 这些是二进制或无需换行处理的
+*.png binary
+*.jpg binary
+*.ico binary
