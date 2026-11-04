@@ -2,7 +2,7 @@
 
 按工作区管理 DSH 项目私有指令（`CLAUDE.local.md`），带设置面板。
 
-> **状态：0.1.1**。设置面板可读写、含 git 泄露防护与加载状态判据。已在 DSH 0.2.1-rc.5 + Node 22 上实测。
+> **状态：0.1.2**。设置面板可读写、含 git 泄露防护与加载状态判据。已在 DSH 0.2.1-rc.5 + Node 22 上实测。
 >
 > 已发布到 npm：[dsh-workspace-rules](https://www.npmjs.com/package/dsh-workspace-rules)。
 
