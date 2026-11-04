@@ -4,7 +4,7 @@
 
 > **状态：0.1.1**。设置面板可读写、含 git 泄露防护与加载状态判据。已在 DSH 0.2.1-rc.5 + Node 22 上实测。
 >
-> 尚未发布到 npm，从 GitHub 安装（见下方「安装」）。
+> 已发布到 npm：[dsh-workspace-rules](https://www.npmjs.com/package/dsh-workspace-rules)。
 
 ## 它做什么
 
@@ -34,15 +34,19 @@
 
 ## 安装
 
-目前从 GitHub 装（npm 上还没有）：
-
 ```bash
-dsh plugin --profile web add github:winson-young/dsh-workspace-rules
+dsh plugin --profile web add dsh-workspace-rules
 ```
 
 `web` 换成你想装进去的 profile 名。装完重启 DSH 进程，设置页多出「工作区规则」一节。
 
-因为本包零构建（源码即产物），从 git 安装不需要跑任何 build 步骤。
+因为本包零构建（源码即产物），安装不需要跑任何 build 步骤。
+
+也可以直接从 GitHub 装（拿到的是最新提交，可能比 npm 上的版本新）：
+
+```bash
+dsh plugin --profile web add github:winson-young/dsh-workspace-rules
+```
 
 > 每个 profile 是独立环境。桌面版由 Electron 独占管理，CLI 装不进 `desktop` profile。
 
