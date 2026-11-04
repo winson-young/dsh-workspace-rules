@@ -145,6 +145,8 @@ node --check lib/client.js
 
 ```
 dsh-workspace-rules/
+├── .github/workflows/
+│   └── publish.yml    # publishes to npm on tag push
 ├── cordis.patch.yml   # bundle patch: inserts the workspace-rules layer
 ├── icon.svg           # icon shown on the Plugins page
 ├── lib/
@@ -153,6 +155,18 @@ dsh-workspace-rules/
 ├── package.json
 └── README.md
 ```
+
+### Releasing
+
+Bump the version in `package.json`, then push a tag:
+
+```bash
+git tag v0.1.3 && git push origin main --tags
+```
+
+`.github/workflows/publish.yml` then runs: syntax check → verify the tag matches the `package.json` version → skip if already on npm → `npm publish --provenance`.
+
+Authentication prefers the `NPM_TOKEN` repository secret; without it the workflow falls back to npm Trusted Publishing (OIDC), which requires configuring a trusted publisher for this repository and workflow on npmjs.com.
 
 ## License
 

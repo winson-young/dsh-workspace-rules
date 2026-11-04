@@ -145,6 +145,8 @@ node --check lib/client.js
 
 ```
 dsh-workspace-rules/
+├── .github/workflows/
+│   └── publish.yml    # tag 推送时自动发布到 npm
 ├── cordis.patch.yml   # bundle patch：把 workspace-rules 层插进 profile
 ├── icon.svg           # 插件页图标
 ├── lib/
@@ -153,6 +155,18 @@ dsh-workspace-rules/
 ├── package.json
 └── README.md
 ```
+
+### 发布
+
+改好 `package.json` 的 version，推 tag 就行：
+
+```bash
+git tag v0.1.3 && git push origin main --tags
+```
+
+`.github/workflows/publish.yml` 会依次：语法自检 → 校验 tag 与 `package.json` 的 version 一致 → 已发布则跳过 → `npm publish --provenance`。
+
+认证优先用仓库 secret `NPM_TOKEN`；没配则回退到 npm 的 Trusted Publishing（OIDC），此时需要在 npmjs.com 上为该仓库和这个 workflow 配一次 trusted publisher。
 
 ## 许可证
 
