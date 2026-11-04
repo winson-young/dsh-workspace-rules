@@ -1,0 +1,90 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # npm provenance 需要它来签 OIDC token
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      # 发出去的东西必须和仓库里的源码一致，先做个最低限度的语法自检
+      - name: Syntax check
+        run: |
+          node --check lib/index.js
+          node --check lib/client.js
+
+      - name: Check tag matches package.json version
+        id: version
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "package.json version: $PKG_VERSION"
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            TAG_VERSION="${GITHUB_REF_NAME#v}"
+            echo "tag version: $TAG_VERSION"
+            if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+              echo "::error::tag ${GITHUB_REF_NAME} does not match package.json version ${PKG_VERSION}"
+              exit 1
+            fi
+          fi
+
+          echo "version=$PKG_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if already published
+        id: exists
+        run: |
+          if npm view "dsh-workspace-rules@${{ steps.version.outputs.version }}" version >/dev/null 2>&1; then
+            echo "dsh-workspace-rules@${{ steps.version.outputs.version }} is already on npm, nothing to do"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check NPM_TOKEN
+        if: steps.exists.outputs.published == 'false'
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "::error::repository secret NPM_TOKEN is not set — add it under Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish
+        if: steps.exists.outputs.published == 'false'
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: |
+          {
+            echo "### dsh-workspace-rules@${{ steps.version.outputs.version }}"
+            echo ""
+            if [ "${{ steps.exists.outputs.published }}" = "true" ]; then
+              echo "Already on npm — skipped."
+            else
+              echo "Published with provenance."
+            fi
+            echo ""
+            echo "https://www.npmjs.com/package/dsh-workspace-rules/v/${{ steps.version.outputs.version }}"
+          } >> "$GITHUB_STEP_SUMMARY"
