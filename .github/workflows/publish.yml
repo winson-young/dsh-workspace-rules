@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  # npm provenance 需要它来签 OIDC token
+  # npm provenance 与 Trusted Publishing 都需要它来签 OIDC token
   id-token: write
 
 concurrency:
@@ -59,15 +59,31 @@ jobs:
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Check NPM_TOKEN
-        if: steps.exists.outputs.published == 'false'
+      # 两条认证路线，配了 secret 就优先用它，没配就走 Trusted Publishing
+      - name: Resolve npm auth
+        id: auth
         run: |
-          if [ -z "${NODE_AUTH_TOKEN}" ]; then
-            echo "::error::repository secret NPM_TOKEN is not set — add it under Settings → Secrets and variables → Actions"
-            exit 1
+          if [ -n "${NODE_AUTH_TOKEN}" ]; then
+            echo "mode=token" >> "$GITHUB_OUTPUT"
+            echo "Using repository secret NPM_TOKEN."
+          else
+            echo "mode=oidc" >> "$GITHUB_OUTPUT"
+            echo "::notice title=npm auth::NPM_TOKEN is not set — falling back to Trusted Publishing (OIDC). Configure a trusted publisher for this repo and workflow on npmjs.com, or add the NPM_TOKEN secret."
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # OIDC 路线需要较新的 npm；setup-node 在 .npmrc 里写的空 _authToken 也要清掉，
+      # 否则 npm 会拿空字符串去认证并直接 401，轮不到 OIDC
+      - name: Prepare OIDC publish
+        if: steps.auth.outputs.mode == 'oidc' && steps.exists.outputs.published == 'false'
+        run: |
+          npm install -g npm@latest
+          npm --version
+          for f in "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}" "$HOME/.npmrc" "$GITHUB_WORKSPACE/.npmrc"; do
+            [ -f "$f" ] && sed -i '/_authToken/d' "$f" && echo "stripped empty _authToken from $f"
+          done
+          exit 0
 
       - name: Publish
         if: steps.exists.outputs.published == 'false'
@@ -83,7 +99,7 @@ jobs:
             if [ "${{ steps.exists.outputs.published }}" = "true" ]; then
               echo "Already on npm — skipped."
             else
-              echo "Published with provenance."
+              echo "Published with provenance (auth: ${{ steps.auth.outputs.mode }})."
             fi
             echo ""
             echo "https://www.npmjs.com/package/dsh-workspace-rules/v/${{ steps.version.outputs.version }}"
