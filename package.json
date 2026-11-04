@@ -26,9 +26,17 @@
     "workspace"
   ],
   "license": "MIT",
+  "author": "winson-young",
+  "homepage": "https://github.com/winson-young/dsh-workspace-rules#readme",
+  "bugs": {
+    "url": "https://github.com/winson-young/dsh-workspace-rules/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/winson-young/dsh-workspace-rules.git"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "dsh": {
     "bundle": {
