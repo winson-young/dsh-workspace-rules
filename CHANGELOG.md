@@ -31,6 +31,7 @@
 - 通过 `ctx.workspaceRegistry` / `ctx.sessionPersistence` 定位工作区与最近会话，不使用目录名反推路径
 - 读最近会话的 baseline 与增量事件，取 `agent-instructions` 的 `digest` 与磁盘内容 sha1 比对，区分「已加载且一致」/「加载的是旧版本」/「无法确认」
 - 扫描有事件预算，超预算降级为「未确认」，不谎报一致
+- 最新会话若还没发过消息（没有 baseline），最多回看 `STATUS_PROBE_SESSIONS = 3` 个，取第一个有记录的，并在诊断区说明「状态取自上一个有记录的会话」——否则用户每新建一个空会话，状态就会莫名失效
 - UI 显示主语（哪个会话、哪个 cwd），不写笼统的「已生效」
 
 **面板**
