@@ -3,6 +3,8 @@
 按工作区管理 DSH 项目私有指令（`CLAUDE.local.md`），带设置面板。
 
 > **状态：0.1.0**。设置面板可读写、含 git 泄露防护与加载状态判据。已在 DSH 0.2.1-rc.5 + Node 22 上实测。
+>
+> 尚未发布到 npm，从 GitHub 安装（见下方「安装」）。
 
 ## 它做什么
 
@@ -32,19 +34,17 @@
 
 ## 安装
 
-```bash
-dsh plugin --profile <profile 名> add dsh-workspace-rules
-```
-
-比如装进 `web` profile：
+目前从 GitHub 装（npm 上还没有）：
 
 ```bash
-dsh plugin --profile web add dsh-workspace-rules
+dsh plugin --profile web add github:winson-young/dsh-workspace-rules
 ```
 
-装完重启 DSH 进程，设置页出现「工作区规则」一节。
+`web` 换成你想装进去的 profile 名。装完重启 DSH 进程，设置页多出「工作区规则」一节。
 
-> 不要装进 `desktop` profile 之外又指望桌面版看到——每个 profile 是独立环境。桌面版由 Electron 独占管理，CLI 改不了。
+因为本包零构建（源码即产物），从 git 安装不需要跑任何 build 步骤。
+
+> 每个 profile 是独立环境。桌面版由 Electron 独占管理，CLI 装不进 `desktop` profile。
 
 开发期挂本地源码用 `link:`：
 

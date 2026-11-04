@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.1.0 — 未发布
+## 0.1.0 — 2026-11-04
+
+首个可用版本。分发方式：GitHub（`dsh plugin add github:winson-young/dsh-workspace-rules`），尚未发布到 npm。
 
 ### M0a · 插件骨架
 
