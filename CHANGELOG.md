@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.4 — 2026-11-05
+
+兼容性声明补齐。代码未改。
+
+- `package.json` 新增 `engines.dsh: ">=0.2.1-rc.5 <0.3.0-0"`：DSH 在加载 bundle 前据此准入，范围外的宿主会**直接跳过本插件并在诊断里写明原因**，而不是装进去之后静默出错
+- 修掉一个隐患：0.1.3 既没有 `engines.dsh` 也没有 `peerDependencies`，`unmetRequirements` 因此永远返回空，等于对所有宿主版本宣称兼容
+- `dsh.compatibility` 补上 `dsh` 键，`dshReleases` 登记 `0.2.2-rc.1` 为已实测
+- README 兼容性表改成「范围 + 实测清单」，中英同步；徽章同步为 `>=0.2.1-rc.5`
+- 已在桌面端 `0.2.2-rc.1` 上核对四条依赖契约：`connection.fetch.register`、`slots.inject('settings.section')`、`locale.register`、`__ModuleLoader__.load`，以及内置加载器的 `CLAUDE.local.md` 候选文件列表，均未变化
+
 ## 0.1.3 — 2026-11-04
 
 首个正式 GitHub Release。只改文档与图标，代码与 0.1.2 完全一致。

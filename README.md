@@ -11,7 +11,7 @@
 [![npm version](https://img.shields.io/npm/v/dsh-workspace-rules?style=flat-square&label=npm&color=cb3837)](https://www.npmjs.com/package/dsh-workspace-rules)
 [![npm downloads](https://img.shields.io/npm/dm/dsh-workspace-rules?style=flat-square&label=downloads%2Fmonth&color=1F883D)](https://www.npmjs.com/package/dsh-workspace-rules)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![DSH](https://img.shields.io/badge/DSH-0.2.1--rc.5-6366f1?style=flat-square)](#兼容性)
+[![DSH](https://img.shields.io/badge/DSH-%3E%3D0.2.1--rc.5-6366f1?style=flat-square)](#兼容性)
 [![node](https://img.shields.io/badge/node-%3E%3D20-339933?style=flat-square)](#开发)
 [![dependencies](https://img.shields.io/badge/runtime%20deps-0-brightgreen?style=flat-square)](#开发)
 [![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)
@@ -127,12 +127,15 @@ dsh plugin --profile web add link:D:/Projects/dsh-workspace-rules
 
 | 项 | 值 |
 |---|---|
-| DSH | `0.2.1-rc.5` ✅ 实测 |
+| DSH | `>= 0.2.1-rc.5 < 0.3.0-0` |
+| 已在下列版本实测 | `0.2.1-rc.5`、`0.2.2-rc.1` |
 | Node | `>= 20` |
 | profile | `web`（桌面版同理，但不经 CLI 安装） |
 | 运行时依赖 | 无 |
 
-`package.json` 里通过 `dsh.compatibility.dshReleases` 声明实测过的版本，而不是把 `peerDependencies` 锁死 —— 锁死会导致其他版本上直接装不上。
+兼容范围写在 `package.json` 的 `engines.dsh` 里。DSH 在加载 bundle 前会拿它做准入判断：范围内的版本正常加载，范围外（0.3.0 起）**直接跳过本插件并在诊断里写明原因**，而不是装进去之后静默出错。
+
+必须声明的原因：不写 `engines.dsh` 也不写 `peerDependencies` 时，DSH 会认为「没有任何要求未满足」，等于对**所有**版本宣称兼容——碰上新宿主真的改了 API，坏的是运行时而不是准入检查，用户只会看到面板打不开。`dsh.compatibility.dshReleases` 另外逐个记录实测过的版本，供插件列表与市场展示。
 
 ## 开发
 

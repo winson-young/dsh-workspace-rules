@@ -11,7 +11,7 @@
 [![npm version](https://img.shields.io/npm/v/dsh-workspace-rules?style=flat-square&label=npm&color=cb3837)](https://www.npmjs.com/package/dsh-workspace-rules)
 [![npm downloads](https://img.shields.io/npm/dm/dsh-workspace-rules?style=flat-square&label=downloads%2Fmonth&color=1F883D)](https://www.npmjs.com/package/dsh-workspace-rules)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![DSH](https://img.shields.io/badge/DSH-0.2.1--rc.5-6366f1?style=flat-square)](#compatibility)
+[![DSH](https://img.shields.io/badge/DSH-%3E%3D0.2.1--rc.5-6366f1?style=flat-square)](#compatibility)
 [![node](https://img.shields.io/badge/node-%3E%3D20-339933?style=flat-square)](#development)
 [![dependencies](https://img.shields.io/badge/runtime%20deps-0-brightgreen?style=flat-square)](#development)
 [![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)
@@ -127,12 +127,15 @@ The diagnostics section at the bottom of the panel shows: load status, which ses
 
 | Item | Value |
 |---|---|
-| DSH | `0.2.1-rc.5` ✅ tested |
+| DSH | `>= 0.2.1-rc.5 < 0.3.0-0` |
+| Tested on | `0.2.1-rc.5`, `0.2.2-rc.1` |
 | Node | `>= 20` |
 | Profile | `web` (the desktop app works too, but is not installed through the CLI) |
 | Runtime dependencies | none |
 
-Tested releases are declared through `dsh.compatibility.dshReleases` instead of pinning `peerDependencies`, because a pinned peer makes the plugin uninstallable on any other host version.
+The supported range lives in `engines.dsh`. DSH checks it before loading a bundle: a version inside the range loads normally, one outside it (`0.3.0` and up) makes DSH **skip the plugin outright and name the reason in its diagnostics** instead of loading it and failing later.
+
+Declaring it matters: with neither `engines.dsh` nor `peerDependencies`, DSH sees no unmet requirement, which is the same as claiming compatibility with **every** release. When a host release really does change an API, the breakage then shows up at runtime rather than at admission, and the user just sees a dead settings panel. `dsh.compatibility.dshReleases` separately records the releases that were actually tested, for plugin lists and marketplace display.
 
 ## Development
 
