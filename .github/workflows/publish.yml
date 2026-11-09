@@ -81,7 +81,12 @@ jobs:
           npm install -g npm@latest
           npm --version
           for f in "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}" "$HOME/.npmrc" "$GITHUB_WORKSPACE/.npmrc"; do
-            [ -f "$f" ] && sed -i '/_authToken/d' "$f" && echo "stripped empty _authToken from $f"
+            # 必须用 if 包裹：[ -f ] 为假时返回 1，而 bash -e 会让循环体最后一条命令的
+            # 非零退出码直接终止整个步骤，轮不到下面的 exit 0（0.2.0 就是这么挂的）
+            if [ -f "$f" ]; then
+              sed -i '/_authToken/d' "$f"
+              echo "stripped _authToken from $f"
+            fi
           done
           exit 0
 
