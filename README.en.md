@@ -141,6 +141,8 @@ Either way, candidates wait for you in the pending list:
 - **Dismiss** → drop that one
 - **Dismiss all** → clears the list (with a confirmation)
 
+The list is ordered newest first, and **keeps at most 8 entries** — new ones push out the oldest. Candidates are a short review queue, not an archive.
+
 In text-editor mode **Add** is disabled — there is no row to append to, so switch back to the rule editor first.
 
 Two counter-intuitive points about **Collect rules automatically**:
