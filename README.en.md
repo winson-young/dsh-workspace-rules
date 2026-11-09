@@ -42,7 +42,7 @@ Three things you actually do:
 | Keep that rule on this machine only | Leave **Sync to project** off (the default). The file is `CLAUDE.local.md`, added to `.git/info/exclude`, invisible to teammates |
 | Share that rule with the whole team | Turn **Sync to project** on. The file is `CLAUDE.md`, committed with the repo, effective for anyone who pulls |
 
-One more shortcut: when a conversation surfaces something worth keeping, ask the model to "remember this as a project rule". It files a candidate in the panel's **pending list** — **nothing is written by default**; it only lands in the file after you click **Add** and then **Save**.
+One more shortcut: turn on **Collect rules automatically**, and when a convention worth keeping shows up, the assistant files it in the panel's **pending list** by itself — **nothing is written by default**; it only lands in the file after you click **Add** and then **Save**. Leave the switch off if you'd rather it only happens when you say "remember this as a project rule".
 
 **Not a good fit for**: personal habits that span projects (use a global `~/.dsh/AGENTS.md`), or rules that must be enforced (use lint / CI — the model follows instructions, it doesn't guarantee them).
 
@@ -58,6 +58,7 @@ One more shortcut: when a conversation surfaces something worth keeping, ask the
 | **One rule per field** | No Markdown by hand. Each rule gets its own input, <kbd>Enter</kbd> starts the next one, `↑` `↓` reorder, `×` deletes; the heading at the top and any trailing prose are preserved as-is |
 | **Local-only or shared** | One switch: off writes `CLAUDE.local.md` and keeps it out of git via `exclude` (teammates see nothing); on writes `CLAUDE.md` straight into the repository |
 | **Pending list** | Rules spotted during a session land in the panel and are **not written by default**. Only after you click **Add** do they reach the editor, and only after **Save** do they reach the file |
+| **Automatic collection** | Turn it on and the assistant files conventions from the conversation into the pending list on its own. The trigger instruction is injected into the system prompt by the plugin — it **never enters a rule file**, so you won't see it in the editor, and it costs no rule slot |
 | **Zero deps, zero build** | Source is the artifact. No bundler, no `node_modules`, works the moment it is installed |
 
 ## Install
@@ -124,13 +125,28 @@ If both files exist in one directory, the loader reads **both** (the more specif
 
 ### Rules collected during a session
 
-Ask the model to "remember this as a project rule" and it calls `suggest_workspace_rule` with your candidates. Nothing is written to the project — candidates land in the panel's pending list, stored under `$DSH_HOME/workspace-rules/pending/`:
+Rules don't always have to be typed in. A convention that comes up in conversation can take a shorter path: the model calls `suggest_workspace_rule` and files a candidate in the panel's pending list. Nothing is written to the project — candidates land under `$DSH_HOME/workspace-rules/pending/`, so they can't leak into the repo before you approve them.
+
+When that happens depends on the **Collect rules automatically** switch:
+
+| | Off (default) | On |
+|---|---|---|
+| Trigger | You explicitly say "remember this as a project rule" | The assistant decides, filing anything that looks like a durable convention |
+| Where the instruction comes from | The tool description alone | The tool description **plus** a paragraph the plugin injects into the system prompt |
+| How intrusive | Only when you ask | Possibly more eager than you'd like |
+
+Either way, candidates wait for you in the pending list:
 
 - **Add** → appended as the last row of the editor, marked unsaved. **Nothing hits the file until you save**
 - **Dismiss** → drop that one
 - **Dismiss all** → clears the list (with a confirmation)
 
 In text-editor mode **Add** is disabled — there is no row to append to, so switch back to the rule editor first.
+
+Two counter-intuitive points about **Collect rules automatically**:
+
+- **That trigger instruction lives in no file.** It is injected by the host while assembling the system prompt, so you won't find it in `CLAUDE.local.md` or `CLAUDE.md`. Turning the switch on adds it, turning it off removes it — which is also why it costs no rule slot and can't be deleted by accident.
+- **It's a global switch**, stored in `~/.dsh/workspace-rules/settings.json`, applying to every project and every session (sub-agents included). It is plugin preference, not project data, so it never travels with the repo.
 
 After saving:
 
@@ -164,6 +180,7 @@ The diagnostics section at the bottom of the panel shows: load status, which ses
 - **Writes**: temp file + rename for atomicity; retries on `EPERM`/`EBUSY`, then degrades to a direct write and says so in the response
 - **Concurrency**: `baseMtimeMs` optimistic lock; conflicts return 409 and distinguish `appeared` / `changed` / `removed`
 - **Backups**: the previous content goes to `$DSH_HOME/backups/workspace-rules/`, **never into the project** (a stray file there would break the exact-match exclude rule)
+- **Automatic collection prompt**: when the switch is on, the host adds one short constant paragraph via `ctx.systemPrompt.section()`, placed after the file-reference section and before the tool instructions. The text never varies per session, so prefix caching is unaffected; with the switch off it returns an empty string and the host drops it
 
 ### Why sync mode can only write `CLAUDE.md`
 
@@ -174,6 +191,7 @@ Taking over injection means reimplementing the official 63 KB of logic: session-
 ## Limitations
 
 - **No per-session isolation.** Every session in a workspace shares the same rule file.
+- **Collect rules automatically is global**, not per project. It changes how sessions behave (whether the assistant files candidates on its own), so "on for this project only" isn't possible today — leave it off and ask explicitly when you want a rule captured.
 - **Only two filenames are written**: `CLAUDE.local.md` (sync off) or `CLAUDE.md` (sync on). `AGENTS.md` and `AGENTS.local.md` in the same directory are reported as present but never modified or previewed.
 - **The exclude check runs once, at save time**, and only matters while sync is off. The plugin has no idea whether the ignore rule is changed afterwards. The manual equivalent:
 
