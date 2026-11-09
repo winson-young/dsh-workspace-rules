@@ -1,7 +1,7 @@
 {
   "name": "dsh-workspace-rules",
-  "version": "0.1.6",
-  "description": "按工作区管理 DSH 项目私有指令（CLAUDE.local.md），带设置面板",
+  "version": "0.2.0",
+  "description": "按工作区管理 DSH 项目规则（本机私有 CLAUDE.local.md 或团队共享 CLAUDE.md），带设置面板与待确认区",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
