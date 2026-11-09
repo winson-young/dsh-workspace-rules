@@ -35,6 +35,7 @@ This plugin turns those lines into **one file inside the project**, loaded autom
 | **Invisible to teammates** | `CLAUDE.local.md` is a local-only convention; paired with `.git/info/exclude` it never enters version control, so a teammate's Cursor / Codex / [CC] sees no trace of it |
 | **Git leak protection** | `.git/info/exclude` is repaired on save; if the file is already tracked by the index the save is refused with a `git rm --cached` hint. Handles submodules and worktrees |
 | **Honest load status** | The panel tells you whether the session actually read *this* version of the file, by comparing the real `digest` recorded in the session — not by guessing |
+| **One rule per field** | No Markdown by hand. Each rule gets its own input, <kbd>Enter</kbd> starts the next one, `↑` `↓` reorder, `×` deletes; the heading at the top and any trailing prose are preserved as-is |
 | **Zero deps, zero build** | Source is the artifact. No bundler, no `node_modules`, works the moment it is installed |
 
 ## Install
@@ -65,8 +66,12 @@ Use `link:`, not `file:` — `file:` **copies** the package, so later edits sile
 
 1. Open **Settings → Workspace rules**
 2. Pick or type a workspace directory
-3. Write the project's conventions
+3. Fill in one rule per field
 4. Save
+
+Each rule gets its own input. Press <kbd>Enter</kbd> on any row to open a new one below it and focus it; `↑` `↓` reorder, `×` deletes. Empty rows are dropped on save, so drafting a row and filling it later never leaves a bare `- ` in the file.
+
+No Markdown knowledge needed. What gets written is still plain Markdown:
 
 ```markdown
 # Conventions
@@ -75,6 +80,11 @@ Use `link:`, not `file:` — `file:` **copies** the package, so later edits sile
 - Keep every SQL statement in the model layer; never build SQL in services or handlers
 - Check the existing implementation before adding a new one
 ```
+
+Two exceptions:
+
+- **Headings, prose paragraphs and code blocks** are not shown in the rule editor and are preserved byte-for-byte on save. To change them, use **Edit Markdown directly** on the right of the heading row.
+- When the file is more complex than a flat list (nested lists, `##` groups between rules, indented continuation lines), the panel **switches to the text editor and says why** instead of guessing at a rewrite. The rule editor is unavailable for such files.
 
 After saving:
 
